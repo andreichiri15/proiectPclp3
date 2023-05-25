@@ -3,6 +3,9 @@
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
+#define CIRCLE_RADIUS 50
+#define RECT_WIDTH 100
+#define RECT_HEIGHT 50
 #define DEFAULT_BRUSH_SIZE 1
 
 SDL_Window *window = NULL;
@@ -57,6 +60,15 @@ void drawCircle(SDL_Renderer *renderer, int centerX, int centerY, int radius,
 
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0,
 						   255); // Reset the renderer color to black
+}
+
+void drawRectangle(SDL_Renderer *renderer, int x, int y, int width, int height,
+				   Uint8 red, Uint8 green, Uint8 blue)
+{
+	SDL_SetRenderDrawColor(renderer, red, green, blue, 255);
+
+	SDL_Rect rect = {x, y, width, height};
+	SDL_RenderDrawRect(renderer, &rect);
 }
 
 int main(void)
@@ -117,7 +129,17 @@ int main(void)
 				SDL_GetMouseState(&mouseX, &mouseY);
 
 				// Draw a circle at the mouse position
-				drawCircle(renderer, mouseX, mouseY, 50, red, green, blue);
+				drawCircle(renderer, mouseX, mouseY, CIRCLE_RADIUS, red, green,
+						   blue);
+				SDL_RenderPresent(renderer);
+			} else if (event.key.keysym.sym == SDLK_d) {
+				// Get the mouse position
+				int mouseX, mouseY;
+				SDL_GetMouseState(&mouseX, &mouseY);
+
+				// Draw a rectangle at the mouse position
+				drawRectangle(renderer, mouseX, mouseY, RECT_WIDTH, RECT_HEIGHT,
+							  red, green, blue);
 				SDL_RenderPresent(renderer);
 			}
 			break;
