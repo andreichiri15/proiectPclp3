@@ -63,22 +63,27 @@ void fill(int x, int y, Uint32 targetColor, Uint32 fillColor,
 
 int main(void)
 {
-	SDL_Window *window = NULL;
-	SDL_Renderer *renderer = NULL;
-	SDL_Event event;
+	SDL_Window *window = NULL;     
+	SDL_Renderer *renderer = NULL; 
+	SDL_Event event;               
 	int isDrawing = 0;
 
-	SDL_Init(SDL_INIT_VIDEO);
+	SDL_Init(SDL_INIT_VIDEO); // Initialize SDL video subsystem
 
+	// Create a window with the specified title, position, and size
 	window = SDL_CreateWindow("Paint Program", SDL_WINDOWPOS_UNDEFINED,
 							  SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH,
 							  WINDOW_HEIGHT, 0);
+
+	// Create a renderer for rendering graphics
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
+	// Set the renderer's draw color to white and clear the renderer
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	SDL_RenderClear(renderer);
 	SDL_RenderPresent(renderer);
 
+	// Event loop to handle events until the user quits
 	while (SDL_WaitEvent(&event) && event.type != SDL_QUIT) {
 		switch (event.type) {
 		case SDL_MOUSEBUTTONDOWN:
@@ -108,6 +113,7 @@ int main(void)
 		}
 	}
 
+	// Cleanup and quit
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
