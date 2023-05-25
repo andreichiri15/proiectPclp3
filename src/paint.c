@@ -61,31 +61,58 @@ void fill(int x, int y, Uint32 targetColor, Uint32 fillColor,
 	free(stack);
 }
 
+// Function to erase all colors and set the screen back to full white
+void eraseScreen(SDL_Renderer *renderer, int windowWidth, int windowHeight)
+{
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255,
+						   255); // Set the render draw color to white
+	SDL_RenderClear(renderer); // Clear the renderer with the current draw color
+	SDL_RenderPresent(renderer); // Update the screen with the cleared renderer
+}
+
 int main(void)
 {
-	SDL_Window *window = NULL;     
-	SDL_Renderer *renderer = NULL; 
-	SDL_Event event;               
+	SDL_Window *window = NULL;
+	SDL_Renderer *renderer = NULL;
+	SDL_Event event;
 	int isDrawing = 0;
+	int prevMouseX, prevMouseY;
+	Uint8 red = 0, green = 0, blue = 0;
 
-	SDL_Init(SDL_INIT_VIDEO); // Initialize SDL video subsystem
+	SDL_Init(SDL_INIT_VIDEO);
 
-	// Create a window with the specified title, position, and size
 	window = SDL_CreateWindow("Paint Program", SDL_WINDOWPOS_UNDEFINED,
 							  SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH,
 							  WINDOW_HEIGHT, 0);
-
-	// Create a renderer for rendering graphics
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
-	// Set the renderer's draw color to white and clear the renderer
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	SDL_RenderClear(renderer);
 	SDL_RenderPresent(renderer);
 
-	// Event loop to handle events until the user quits
 	while (SDL_WaitEvent(&event) && event.type != SDL_QUIT) {
 		switch (event.type) {
+		case SDL_KEYDOWN:
+			if (event.key.keysym.sym == SDLK_e) {
+				eraseScreen(renderer, WINDOW_WIDTH, WINDOW_HEIGHT);
+			} else if (event.key.keysym.sym == SDLK_r) {
+				red = 255;
+				green = 0;
+				blue = 0;
+			} else if (event.key.keysym.sym == SDLK_g) {
+				red = 0;
+				green = 255;
+				blue = 0;
+			} else if (event.key.keysym.sym == SDLK_b) {
+				red = 0;
+				green = 0;
+				blue = 255;
+			} else if (event.key.keysym.sym == SDLK_y) {
+				red = 255;
+				green = 255;
+				blue = 0;
+			}
+			break;
 		case SDL_MOUSEBUTTONDOWN:
 			if (event.button.button == SDL_BUTTON_LEFT) {
 				if (SDL_GetModState() & KMOD_LSHIFT) {
@@ -95,6 +122,8 @@ int main(void)
 					SDL_UpdateWindowSurface(window);
 				} else {
 					isDrawing = 1;
+					prevMouseX = event.button.x;
+					prevMouseY = event.button.y;
 				}
 			}
 			break;
@@ -105,15 +134,16 @@ int main(void)
 			break;
 		case SDL_MOUSEMOTION:
 			if (isDrawing) {
-				SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-				SDL_RenderDrawPoint(renderer, event.motion.x, event.motion.y);
-				SDL_RenderPresent(renderer);
+				SDL_SetRenderDrawColor(renderer, red, green, blue, 255);
+                SDL_RenderDrawLine(renderer, prevMouseX, prevMouseY, event.motion.x, event.motion.y);
+                SDL_RenderPresent(renderer);
+                prevMouseX = event.motion.x;
+                prevMouseY = event.motion.y;
 			}
 			break;
 		}
 	}
 
-	// Cleanup and quit
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
