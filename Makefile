@@ -1,5 +1,5 @@
 build:
-	gcc -Wall -std=c99 ./src/*.c -o paint -lSDL2
+	gcc -Wall -std=c99 ./src/*.c -o paint -lSDL2 -lSDL2_image
 
 run:
 	./paint
