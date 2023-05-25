@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_render.h>
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -37,6 +38,30 @@ void cleanup()
 	SDL_Quit();
 }
 
+void draw()
+{
+	SDL_SetRenderDrawColor(renderer, red, green, blue, 255);
+
+	// Draw lines with the current brush size
+	SDL_RenderDrawLine(renderer, prevMouseX, prevMouseY, event.motion.x,
+					   event.motion.y);
+
+	// Draw additional lines for brush size
+	int brushOffset = brushSize;
+	for (int i = -brushOffset; i <= brushOffset; ++i) {
+		for (int j = -brushOffset; j <= brushOffset; ++j) {
+			if (i != 0 || j != 0) {
+				SDL_RenderDrawLine(renderer, prevMouseX + i, prevMouseY + j,
+								   event.motion.x + i, event.motion.y + j);
+			}
+		}
+	}
+
+	SDL_RenderPresent(renderer);
+	prevMouseX = event.motion.x;
+	prevMouseY = event.motion.y;
+}
+
 // Function to erase all colors and set the screen back to full white
 void eraseScreen(SDL_Renderer *renderer)
 {
@@ -44,6 +69,47 @@ void eraseScreen(SDL_Renderer *renderer)
 						   255); // Set the render draw color to white
 	SDL_RenderClear(renderer); // Clear the renderer with the current draw color
 	SDL_RenderPresent(renderer); // Update the screen with the cleared renderer
+}
+
+void set_red()
+{
+	red = 255;
+	green = 0;
+	blue = 0;
+}
+
+void set_green()
+{
+	red = 0;
+	green = 255;
+	blue = 0;
+}
+
+void set_blue()
+{
+	red = 0;
+	green = 0;
+	blue = 255;
+}
+void set_yellow()
+{
+	red = 255;
+	green = 255;
+	blue = 0;
+}
+
+void set_white()
+{
+	red = 255;
+	green = 255;
+	blue = 255;
+}
+
+void set_black()
+{
+	red = 0;
+	green = 0;
+	blue = 0;
 }
 
 // Function to fill the screen with a certain color
@@ -120,6 +186,12 @@ void drawRectangle(SDL_Renderer *renderer, int x, int y, int width, int height,
 	}
 }
 
+void saveImage(char *filename)
+{
+	SDL_Surface *surface = SDL_GetWindowSurface(window);
+	SDL_SaveBMP(surface, filename);
+}
+
 int main(void)
 {
 	initialize();
@@ -130,29 +202,17 @@ int main(void)
 			if (event.key.keysym.sym == SDLK_e) {
 				eraseScreen(renderer);
 			} else if (event.key.keysym.sym == SDLK_r) {
-				red = 255;
-				green = 0;
-				blue = 0;
+				set_red();
 			} else if (event.key.keysym.sym == SDLK_g) {
-				red = 0;
-				green = 255;
-				blue = 0;
+				set_green();
 			} else if (event.key.keysym.sym == SDLK_b) {
-				red = 0;
-				green = 0;
-				blue = 255;
+				set_blue();
 			} else if (event.key.keysym.sym == SDLK_y) {
-				red = 255;
-				green = 255;
-				blue = 0;
+				set_yellow();
 			} else if (event.key.keysym.sym == SDLK_w) {
-				red = 255;
-				green = 255;
-				blue = 255;
+				set_white();
 			} else if (event.key.keysym.sym == SDLK_n) {
-				red = 0;
-				green = 0;
-				blue = 0;
+				set_black();
 			} else if (event.key.keysym.sym == SDLK_1) {
 				brushSize = 1; // Set brush size to 1
 			} else if (event.key.keysym.sym == SDLK_2) {
@@ -179,6 +239,9 @@ int main(void)
 				drawRectangle(renderer, mouseX, mouseY, RECT_WIDTH, RECT_HEIGHT,
 							  brushSize, red, green, blue);
 				SDL_RenderPresent(renderer);
+			} else if (event.key.keysym.sym == SDLK_s) {
+				SDL_RenderPresent(renderer);
+				saveImage("image.bmp");
 			}
 			break;
 		case SDL_MOUSEBUTTONDOWN:
@@ -200,27 +263,7 @@ int main(void)
 			break;
 		case SDL_MOUSEMOTION:
 			if (isDrawing) {
-				SDL_SetRenderDrawColor(renderer, red, green, blue, 255);
-
-				// Draw lines with the current brush size
-				SDL_RenderDrawLine(renderer, prevMouseX, prevMouseY,
-								   event.motion.x, event.motion.y);
-
-				// Draw additional lines for brush size
-				int brushOffset = brushSize;
-				for (int i = -brushOffset; i <= brushOffset; ++i) {
-					for (int j = -brushOffset; j <= brushOffset; ++j) {
-						if (i != 0 || j != 0) {
-							SDL_RenderDrawLine(
-								renderer, prevMouseX + i, prevMouseY + j,
-								event.motion.x + i, event.motion.y + j);
-						}
-					}
-				}
-
-				SDL_RenderPresent(renderer);
-				prevMouseX = event.motion.x;
-				prevMouseY = event.motion.y;
+				draw();
 			}
 			break;
 		}
