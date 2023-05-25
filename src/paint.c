@@ -10,6 +10,32 @@
 
 SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
+SDL_Event event;
+int isDrawing = 0;
+int prevMouseX, prevMouseY;
+Uint8 red = 0, green = 0, blue = 0;
+int brushSize = DEFAULT_BRUSH_SIZE; // Variable to store the brush size
+
+// Function to initialize SDL and create the window and renderer
+void initialize()
+{
+	SDL_Init(SDL_INIT_VIDEO);
+	window = SDL_CreateWindow("Paint Program", SDL_WINDOWPOS_UNDEFINED,
+							  SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH,
+							  WINDOW_HEIGHT, 0);
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+	SDL_RenderClear(renderer);
+	SDL_RenderPresent(renderer);
+}
+
+// Function to clean up SDL resources and exit the program
+void cleanup()
+{
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
+}
 
 // Function to erase all colors and set the screen back to full white
 void eraseScreen(SDL_Renderer *renderer)
@@ -30,7 +56,7 @@ void fill(SDL_Renderer *renderer, Uint8 red, Uint8 green, Uint8 blue)
 }
 
 void drawCircle(SDL_Renderer *renderer, int centerX, int centerY, int radius,
-				Uint8 red, Uint8 green, Uint8 blue)
+				int brushSize, Uint8 red, Uint8 green, Uint8 blue)
 {
 	SDL_SetRenderDrawColor(renderer, red, green, blue, 255);
 
@@ -39,14 +65,28 @@ void drawCircle(SDL_Renderer *renderer, int centerX, int centerY, int radius,
 	int decision = 3 - 2 * radius;
 
 	while (x <= y) {
-		SDL_RenderDrawPoint(renderer, centerX + x, centerY + y);
-		SDL_RenderDrawPoint(renderer, centerX - x, centerY + y);
-		SDL_RenderDrawPoint(renderer, centerX + x, centerY - y);
-		SDL_RenderDrawPoint(renderer, centerX - x, centerY - y);
-		SDL_RenderDrawPoint(renderer, centerX + y, centerY + x);
-		SDL_RenderDrawPoint(renderer, centerX - y, centerY + x);
-		SDL_RenderDrawPoint(renderer, centerX + y, centerY - x);
-		SDL_RenderDrawPoint(renderer, centerX - y, centerY - x);
+		for (int i = -brushSize; i <= brushSize; ++i) {
+			for (int j = -brushSize; j <= brushSize; ++j) {
+				if (i != 0 || j != 0) {
+					SDL_RenderDrawPoint(renderer, centerX + x + i,
+										centerY + y + j);
+					SDL_RenderDrawPoint(renderer, centerX - x + i,
+										centerY + y + j);
+					SDL_RenderDrawPoint(renderer, centerX + x + i,
+										centerY - y + j);
+					SDL_RenderDrawPoint(renderer, centerX - x + i,
+										centerY - y + j);
+					SDL_RenderDrawPoint(renderer, centerX + y + i,
+										centerY + x + j);
+					SDL_RenderDrawPoint(renderer, centerX - y + i,
+										centerY + x + j);
+					SDL_RenderDrawPoint(renderer, centerX + y + i,
+										centerY - x + j);
+					SDL_RenderDrawPoint(renderer, centerX - y + i,
+										centerY - x + j);
+				}
+			}
+		}
 
 		x++;
 
@@ -63,32 +103,26 @@ void drawCircle(SDL_Renderer *renderer, int centerX, int centerY, int radius,
 }
 
 void drawRectangle(SDL_Renderer *renderer, int x, int y, int width, int height,
-				   Uint8 red, Uint8 green, Uint8 blue)
+				   int brushSize, Uint8 red, Uint8 green, Uint8 blue)
 {
 	SDL_SetRenderDrawColor(renderer, red, green, blue, 255);
 
-	SDL_Rect rect = {x, y, width, height};
-	SDL_RenderDrawRect(renderer, &rect);
+	int thickness =
+		brushSize * 2; // Set the initial thickness to the brush size
+
+	// Draw multiple rectangles with increasing thickness
+	while (thickness > 0) {
+		SDL_Rect rect = {x - thickness, y - thickness, width + thickness * 2,
+						 height + thickness * 2};
+		SDL_RenderDrawRect(renderer, &rect);
+
+		thickness--; // Reduce the thickness by 1 to create thicker margins
+	}
 }
 
 int main(void)
 {
-	SDL_Event event;
-	int isDrawing = 0;
-	int prevMouseX, prevMouseY;
-	Uint8 red = 0, green = 0, blue = 0;
-	int brushSize = DEFAULT_BRUSH_SIZE; // Variable to store the brush size
-
-	SDL_Init(SDL_INIT_VIDEO);
-
-	window = SDL_CreateWindow("Paint Program", SDL_WINDOWPOS_UNDEFINED,
-							  SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH,
-							  WINDOW_HEIGHT, 0);
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-	SDL_RenderClear(renderer);
-	SDL_RenderPresent(renderer);
+	initialize();
 
 	while (SDL_WaitEvent(&event) && event.type != SDL_QUIT) {
 		switch (event.type) {
@@ -115,6 +149,10 @@ int main(void)
 				red = 255;
 				green = 255;
 				blue = 255;
+			} else if (event.key.keysym.sym == SDLK_n) {
+				red = 0;
+				green = 0;
+				blue = 0;
 			} else if (event.key.keysym.sym == SDLK_1) {
 				brushSize = 1; // Set brush size to 1
 			} else if (event.key.keysym.sym == SDLK_2) {
@@ -129,8 +167,8 @@ int main(void)
 				SDL_GetMouseState(&mouseX, &mouseY);
 
 				// Draw a circle at the mouse position
-				drawCircle(renderer, mouseX, mouseY, CIRCLE_RADIUS, red, green,
-						   blue);
+				drawCircle(renderer, mouseX, mouseY, CIRCLE_RADIUS, brushSize,
+						   red, green, blue);
 				SDL_RenderPresent(renderer);
 			} else if (event.key.keysym.sym == SDLK_d) {
 				// Get the mouse position
@@ -139,7 +177,7 @@ int main(void)
 
 				// Draw a rectangle at the mouse position
 				drawRectangle(renderer, mouseX, mouseY, RECT_WIDTH, RECT_HEIGHT,
-							  red, green, blue);
+							  brushSize, red, green, blue);
 				SDL_RenderPresent(renderer);
 			}
 			break;
@@ -188,9 +226,7 @@ int main(void)
 		}
 	}
 
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
+	cleanup();
 
 	return 0;
 }
