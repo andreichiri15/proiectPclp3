@@ -16,6 +16,7 @@ int isDrawing = 0;
 int prevMouseX, prevMouseY;
 Uint8 red = 0, green = 0, blue = 0;
 int brushSize = DEFAULT_BRUSH_SIZE; // Variable to store the brush size
+float brushOpacity = 1.0;           // Variables for brush opacity
 
 // Function to initialize SDL and create the window and renderer
 void initialize()
@@ -40,7 +41,9 @@ void cleanup()
 
 void draw()
 {
-	SDL_SetRenderDrawColor(renderer, red, green, blue, 255);
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawColor(renderer, red, green, blue,
+						   (Uint8)(255 * brushOpacity));
 
 	// Draw lines with the current brush size
 	SDL_RenderDrawLine(renderer, prevMouseX, prevMouseY, event.motion.x,
@@ -115,8 +118,10 @@ void set_black()
 // Function to fill the screen with a certain color
 void fill(SDL_Renderer *renderer, Uint8 red, Uint8 green, Uint8 blue)
 {
-	SDL_SetRenderDrawColor(renderer, red, green, blue,
-						   255); // Set the render draw color to white
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawColor(
+		renderer, red, green, blue,
+		(Uint8)(255 * brushOpacity)); // Set the render draw color to white
 	SDL_RenderClear(renderer); // Clear the renderer with the current draw color
 	SDL_RenderPresent(renderer); // Update the screen with the cleared renderer
 }
@@ -124,7 +129,9 @@ void fill(SDL_Renderer *renderer, Uint8 red, Uint8 green, Uint8 blue)
 void drawCircle(SDL_Renderer *renderer, int centerX, int centerY, int radius,
 				int brushSize, Uint8 red, Uint8 green, Uint8 blue)
 {
-	SDL_SetRenderDrawColor(renderer, red, green, blue, 255);
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawColor(renderer, red, green, blue,
+						   (Uint8)(255 * brushOpacity));
 
 	int x = 0;
 	int y = radius;
@@ -171,7 +178,9 @@ void drawCircle(SDL_Renderer *renderer, int centerX, int centerY, int radius,
 void drawRectangle(SDL_Renderer *renderer, int x, int y, int width, int height,
 				   int brushSize, Uint8 red, Uint8 green, Uint8 blue)
 {
-	SDL_SetRenderDrawColor(renderer, red, green, blue, 255);
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawColor(renderer, red, green, blue,
+						   (Uint8)(255 * brushOpacity));
 
 	int thickness =
 		brushSize * 2; // Set the initial thickness to the brush size
@@ -184,12 +193,6 @@ void drawRectangle(SDL_Renderer *renderer, int x, int y, int width, int height,
 
 		thickness--; // Reduce the thickness by 1 to create thicker margins
 	}
-}
-
-void saveImage(char *filename)
-{
-	SDL_Surface *surface = SDL_GetWindowSurface(window);
-	SDL_SaveBMP(surface, filename);
 }
 
 int main(void)
@@ -221,6 +224,14 @@ int main(void)
 				brushSize = 3; // Set brush size to 3
 			} else if (event.key.keysym.sym == SDLK_4) {
 				brushSize = 4; // Set brush size to 4
+			} else if (event.key.keysym.sym == SDLK_6) {
+				brushOpacity = 0.2;
+			} else if (event.key.keysym.sym == SDLK_7) {
+				brushOpacity = 0.4;
+			} else if (event.key.keysym.sym == SDLK_8) {
+				brushOpacity = 0.7;
+			} else if (event.key.keysym.sym == SDLK_9) {
+				brushOpacity = 1.0;
 			} else if (event.key.keysym.sym == SDLK_c) {
 				// Get the mouse position
 				int mouseX, mouseY;
@@ -239,9 +250,6 @@ int main(void)
 				drawRectangle(renderer, mouseX, mouseY, RECT_WIDTH, RECT_HEIGHT,
 							  brushSize, red, green, blue);
 				SDL_RenderPresent(renderer);
-			} else if (event.key.keysym.sym == SDLK_s) {
-				SDL_RenderPresent(renderer);
-				saveImage("image.bmp");
 			}
 			break;
 		case SDL_MOUSEBUTTONDOWN:
