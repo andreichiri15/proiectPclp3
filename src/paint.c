@@ -41,6 +41,7 @@ void cleanup()
 
 void draw()
 {
+	// Change the opacity if needed
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(renderer, red, green, blue,
 						   (Uint8)(255 * brushOpacity));
@@ -60,6 +61,7 @@ void draw()
 		}
 	}
 
+	// Keep the mouse click positions
 	SDL_RenderPresent(renderer);
 	prevMouseX = event.motion.x;
 	prevMouseY = event.motion.y;
@@ -74,6 +76,8 @@ void eraseScreen(SDL_Renderer *renderer)
 	SDL_RenderPresent(renderer); // Update the screen with the cleared renderer
 }
 
+
+// Functions to set the drawing color
 void set_red()
 {
 	red = 255;
@@ -182,8 +186,8 @@ void drawRectangle(SDL_Renderer *renderer, int x, int y, int width, int height,
 	SDL_SetRenderDrawColor(renderer, red, green, blue,
 						   (Uint8)(255 * brushOpacity));
 
-	int thickness =
-		brushSize * 2; // Set the initial thickness to the brush size
+	// Set the initial thickness to the brush size
+	int thickness = brushSize * 2;
 
 	// Draw multiple rectangles with increasing thickness
 	while (thickness > 0) {
@@ -197,13 +201,14 @@ void drawRectangle(SDL_Renderer *renderer, int x, int y, int width, int height,
 
 int main(void)
 {
-	initialize();
+	initialize(); // Initialize SDL and create the window and renderer
 
 	while (SDL_WaitEvent(&event) && event.type != SDL_QUIT) {
 		switch (event.type) {
 		case SDL_KEYDOWN:
+			// Handle keyboard events
 			if (event.key.keysym.sym == SDLK_e) {
-				eraseScreen(renderer);
+				eraseScreen(renderer); // "Erase" the screen with white color
 			} else if (event.key.keysym.sym == SDLK_r) {
 				set_red();
 			} else if (event.key.keysym.sym == SDLK_g) {
@@ -271,6 +276,7 @@ int main(void)
 			break;
 		case SDL_MOUSEMOTION:
 			if (isDrawing) {
+				// Draw a line from the previous mouse position to the current mouse position
 				draw();
 			}
 			break;
