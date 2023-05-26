@@ -1,3 +1,6 @@
+// Copyright Dragos Banica, Andrei Chirimeaca
+// PCLP3 2023
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_render.h>

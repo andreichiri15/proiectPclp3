@@ -1,3 +1,6 @@
+// Copyright Dragos Banica, Andrei Chirimeaca
+// PCLP3 2023
+
 #include "header.h"
 
 // Function to erase all colors and set the screen back to full white

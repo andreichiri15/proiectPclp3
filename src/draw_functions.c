@@ -1,3 +1,6 @@
+// Copyright Dragos Banica, Andrei Chirimeaca
+// PCLP3 2023
+
 #include "header.h"
 
 // Functions to set the drawing color
