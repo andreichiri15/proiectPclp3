@@ -19,5 +19,5 @@ In order to be able to compile and run the program, you need to download the SDL
 - E: Erase all drawings and revert to a blank image
 
 ## Copyright
-Banica Dragos && Andrei Chirimeaca
+Dragos Banica && Andrei Chirimeaca
 312CA PCLP3 2023
