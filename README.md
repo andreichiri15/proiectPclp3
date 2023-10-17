@@ -1,7 +1,7 @@
 # Paint program
 
 ## Utils
-In order to be able to compile and run the program, you need to download the SDL library open the terminal and type:
+In order to be able to compile and run the program, you need to download the SDL library. Open the terminal and type:
     
 - sudo apt update
 - sudo apt install libsdl2-dev
